@@ -17,3 +17,4 @@
 1. 在user.js中设置'/login'接口
 2. 在app.js中使用` app.use(express.urlencoded({ extended: true })) `和` app.use(express.json()) `解析请求参数
 3. 使用` curl http://localhost:5000/user/login -d "username=TaoLoading&password=123456" `测试接口
+4. 使用cors插件解决跨域问题

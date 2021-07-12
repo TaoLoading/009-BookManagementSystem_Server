@@ -1,5 +1,6 @@
 const express = require('express')
 const router = require('./router/index')
+const cors = require('cors')
 
 // 创建express应用
 const app = express()
@@ -7,6 +8,9 @@ const app = express()
 // 使用express解析请求参数
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
+// 使用cors解决跨域
+app.use(cors())
 
 // 设置路由
 app.use('/', router)
