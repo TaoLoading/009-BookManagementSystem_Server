@@ -18,6 +18,6 @@ app.get('/', function (req, res) {
 
 // 使用express监听5000端口号发起的http请求
 const server = app.listen(5000, function () {
-  const { address, port } = server.address()
+  // const { address, port } = server.address()
   console.log('Http服务器启动成功：http://localhost:5000')
 })
