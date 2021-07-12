@@ -7,9 +7,13 @@
 3. 修改配置文件。修改conf目录下的nginx.conf，其中：
    * 修改user为当前登录用户名 + owner
    * 配置http请求
-## 配置MySQL
+## 3. 配置MySQL
 1. 下载MySQL并安装。教程：https://blog.csdn.net/ycxzuoxin/article/details/80908447
 2. 创建book数据库。
    * 字符集选择utf8
    * 排序规则选择utf8_general_ci
    * 运行sql文件
+## 4.登录API
+1. 在user.js中设置'/login'接口
+2. 在app.js中使用` app.use(express.urlencoded({ extended: true })) `和` app.use(express.json()) `解析请求参数
+3. 使用` curl http://localhost:5000/user/login -d "username=TaoLoading&password=123456" `测试接口
