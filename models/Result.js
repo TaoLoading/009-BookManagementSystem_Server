@@ -8,8 +8,10 @@ class Result {
   constructor(data, msg = '操作成功', options) {
     this.data = null
     if (arguments.length === 0) {
+      // 如果没传参数，则显示msg为操作成功
       this.msg = '操作成功'
     } else if (arguments.length === 1) {
+      // 如果传入一个参数，则将传入的参数内容赋值给msg
       this.msg = data
     } else {
       this.data = data
