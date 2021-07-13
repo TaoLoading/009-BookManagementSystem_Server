@@ -29,3 +29,7 @@
    2. 安装crypto库。` npm i -S crypto `
    3. 在utils/index.js文件内配置MD5。
    4. 在router/user.js文件内对密码进行加密处理。` password = md5(password + PWD_SALT) `
+## 6.使用express-validator进行表单验证
+1. 安装express-validator。` npm i -S express-validator `
+2. 在router.post方法中使用body声明验证规则并指定提示信息。如` body('username').isString().withMessage('用户名必须为字符串') `
+3. 判断返回的错误信息是否为空，当存在错误信息时拿到错误信息并将错误信息使用boom传递到自定义路由异常处理中间件进行处理，不存在错误信息则进行登录操作。` next(boom.badRequest(msg)) `
