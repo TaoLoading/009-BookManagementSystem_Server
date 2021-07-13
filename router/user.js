@@ -1,11 +1,11 @@
 const express = require('express')
-const { querySql } = require('../db')
 const Result = require('../models/Result')
 const { login } = require('../service/user')
 const { md5 } = require('../utils')
-const { PWD_SALT } = require('../utils/constant')
+const { PWD_SALT, PRIVATE_KEY, JWT_EXPIRED } = require('../utils/constant')
 const { body, validationResult } = require('express-validator')
 const boom = require('boom')
+const jwt = require('jsonwebtoken')
 
 const router = express.Router()
 
@@ -27,12 +27,20 @@ router.post('/login',
       let { username, password } = req.body
       // 对password进行加密处理
       password = md5(password + PWD_SALT)
-      // 登录处理
+      // 向后台发起登录请求
       login(username, password).then(user => {
         if (!user || user.length === 0) {
           new Result('登录失败').fail(res)
         } else {
-          new Result('登录成功').success(res)
+          // 使用jwt生成token
+          const token = jwt.sign(
+            { username },
+            // 密钥
+            PRIVATE_KEY,
+            // 过期时间
+            { expiresIn: JWT_EXPIRED }
+          )
+          new Result({ token }, '登录成功').success(res)
         }
       })
     }
