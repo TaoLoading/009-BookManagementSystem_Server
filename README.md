@@ -33,9 +33,16 @@
 1. 安装express-validator。` npm i -S express-validator `
 2. 在router.post方法中使用body声明验证规则并指定提示信息。如` body('username').isString().withMessage('用户名必须为字符串') `
 3. 判断返回的错误信息是否为空，当存在错误信息时拿到错误信息并将错误信息使用boom传递到自定义路由异常处理中间件进行处理，不存在错误信息则进行登录操作。` next(boom.badRequest(msg)) `
-## 7.使用jwt生成token
+## 7.生成jwt token
 1. 安装jsonwebtoken。` npm i -S jsonwebtoken `
 2. 在utils/constant.js文件内配置密钥PRIVATE_KEY和过期时间JWT_EXPIRED。` PRIVATE_KEY: 'bookmanagementsystem', JWT_EXPIRED: 60 * 60 `。此处过期时间设置为1小时，通常过期时间建议不超过24小时，保密性要求高的业务可以设置为1-2小时
 3. 调用jwt.sign()生成token。` const token = jwt.sign( { username }, PRIVATE_KEY, { expiresIn: JWT_EXPIRED }) `
 4. 在前端发起登录请求，发现token已被成功写入，可将写入的token放到jwt.io网站上进行解析验证
-5. 
+## 8.进行jwt认证
+1. 安装express-jwt。` npm i -S express-jwt `
+2. 在router/jwt.js文件内配置密钥secret、算法algorithms、校验开关credentialsRequired和白名单路径path。
+3. 在router/index.js文件内引入并使用jwt认证中间件，` router.use(jwtAuth) `，并规定token校验失败时的响应` new Result(null, 'Token验证失败', { error: status, errMsg: message }).jwtError(res.status(status)) `
+## 9.查询用户信息
+1. 在db/index.js文件内定义queryOne()方法
+2. 在service/user.js文件内定义findUser()方法，其中调用queryOne()并传入sql语句` select id,username,nickname,role,avatar from admin_user where username='${username}' `，注意此sql语句只查询了需要的内容
+3. 在router/user.js文件内的` /info `路由下调用findUser()方法查询用户信息

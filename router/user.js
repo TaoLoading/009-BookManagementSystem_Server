@@ -1,6 +1,6 @@
 const express = require('express')
 const Result = require('../models/Result')
-const { login } = require('../service/user')
+const { login, findUser } = require('../service/user')
 const { md5 } = require('../utils')
 const { PWD_SALT, PRIVATE_KEY, JWT_EXPIRED } = require('../utils/constant')
 const { body, validationResult } = require('express-validator')
@@ -47,7 +47,15 @@ router.post('/login',
   })
 
 router.get('/info', function (req, res, next) {
-  res.json('user info...')
+  findUser('admin').then(user => {
+    if (user) {
+      // 前端中获取的是roles故在此进行改动
+      user.roles = [user.role]
+      new Result(user, '用户信息查询成功').success(res)
+    } else {
+      new Result(user, '用户信息查询失败').fail(res)
+    }
+  })
 })
 
 module.exports = router

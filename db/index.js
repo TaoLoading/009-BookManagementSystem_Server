@@ -2,6 +2,7 @@ const mysql = require('mysql')
 const config = require('./config')
 const { debug } = require('../utils/constant')
 
+// 建立数据库连接
 function connect() {
   return mysql.createConnection({
     host: config.host,
@@ -13,6 +14,7 @@ function connect() {
   })
 }
 
+// 查询sql语句
 function querySql(sql) {
   const conn = connect()
   debug && console.log(`查询语句为：${sql}`)
@@ -38,4 +40,19 @@ function querySql(sql) {
   })
 }
 
-module.exports = { querySql }
+// 查询单个用户
+function queryOne(sql) {
+  return new Promise((resolve, reject) => {
+    querySql(sql).then(result => {
+      if (result && result.length > 0) {
+        resolve(result[0])
+      } else {
+        resolve(null)
+      }
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+module.exports = { querySql, queryOne }

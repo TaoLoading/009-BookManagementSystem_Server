@@ -1,10 +1,15 @@
 /* 用户业务逻辑处理 */
 
-const { querySql } = require('../db')
+const { querySql, queryOne } = require('../db')
 
-// 查询用户名和密码
+// 登录时查询用户名和密码是否正确
 function login(username, password) {
   return querySql(`select * from admin_user where username='${username}' and password='${password}'`)
 }
 
-module.exports = { login }
+// 查询用户
+function findUser(username) {
+  return queryOne(` select id,username,nickname,role,avatar from admin_user where username='${username}' `)
+}
+
+module.exports = { login, findUser }
