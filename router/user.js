@@ -7,8 +7,10 @@ const { body, validationResult } = require('express-validator')
 const boom = require('boom')
 const jwt = require('jsonwebtoken')
 
+// 1.创建路由
 const router = express.Router()
 
+// 2.创建请求
 router.post('/login',
   [
     body('username').isString().withMessage('用户名必须为字符串'),
@@ -65,4 +67,5 @@ router.get('/info', function (req, res, next) {
   }
 })
 
+// 3.暴露路由
 module.exports = router
