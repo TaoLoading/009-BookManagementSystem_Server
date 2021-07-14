@@ -1,7 +1,7 @@
 const express = require('express')
 const Result = require('../models/Result')
 const { login, findUser } = require('../service/user')
-const { md5 } = require('../utils')
+const { md5, decoded } = require('../utils')
 const { PWD_SALT, PRIVATE_KEY, JWT_EXPIRED } = require('../utils/constant')
 const { body, validationResult } = require('express-validator')
 const boom = require('boom')
@@ -47,15 +47,22 @@ router.post('/login',
   })
 
 router.get('/info', function (req, res, next) {
-  findUser('admin').then(user => {
-    if (user) {
-      // 前端中获取的是roles故在此进行改动
-      user.roles = [user.role]
-      new Result(user, '用户信息查询成功').success(res)
-    } else {
-      new Result(user, '用户信息查询失败').fail(res)
-    }
-  })
+  // 获取解析后的值
+  const decode = decoded(req)
+  if (decode && decode.username) {
+    // 当解析后的值包含username时开始查询该用户信息
+    findUser(decode.username).then(user => {
+      if (user) {
+        // 前端中获取的是roles故在此进行改动
+        user.roles = [user.role]
+        new Result(user, '用户信息查询成功').success(res)
+      } else {
+        new Result(user, '用户信息查询失败').fail(res)
+      }
+    })
+  } else {
+    new Result(user, '用户信息查询失败').fail(res)
+  }
 })
 
 module.exports = router

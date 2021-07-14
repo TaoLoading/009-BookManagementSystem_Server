@@ -41,8 +41,9 @@
 ## 8.进行jwt认证
 1. 安装express-jwt。` npm i -S express-jwt `
 2. 在router/jwt.js文件内配置密钥secret、算法algorithms、校验开关credentialsRequired和白名单路径path。
-3. 在router/index.js文件内引入并使用jwt认证中间件，` router.use(jwtAuth) `，并规定token校验失败时的响应` new Result(null, 'Token验证失败', { error: status, errMsg: message }).jwtError(res.status(status)) `
+3. 在router/index.js文件内引入并使用jwt认证中间件，` router.use(jwtAuth) `，并规定token校验失败时的响应，` new Result(null, 'Token验证失败', { error: status, errMsg: message }).jwtError(res.status(status)) `
 ## 9.查询用户信息
-1. 在db/index.js文件内定义queryOne()方法
-2. 在service/user.js文件内定义findUser()方法，其中调用queryOne()并传入sql语句` select id,username,nickname,role,avatar from admin_user where username='${username}' `，注意此sql语句只查询了需要的内容
-3. 在router/user.js文件内的` /info `路由下调用findUser()方法查询用户信息
+1. 在utils/index.js文件内定义decoded()方法用于解析token，返回解析后的值`return jwt.verify(token, PRIVATE_KEY) `
+2. 在db/index.js文件内定义queryOne()方法
+3. 在service/user.js文件内定义findUser()方法，其中调用queryOne()并传入sql语句` select id,username,nickname,role,avatar from admin_user where username='${username}' `，注意此sql语句只查询了需要的内容
+4. 在router/user.js文件内的` /info `路由下调用findUser()方法并传入解析后的用户名进行查询` decode.username `
