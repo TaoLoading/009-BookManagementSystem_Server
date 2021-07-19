@@ -755,7 +755,15 @@ class EPub extends EventEmitter {
 
       this.getFile(id, callback);
     } else {
-      callback(new Error("File not found"));
+      // 部分电子书存储图片的item属性properties的值为cover-image
+      const coverId = Object.keys(this.manifest).find(key => (
+        this.manifest[key].properties = 'cover-image'
+      ))
+      if (coverId) {
+        this.getFile(coverId, callback);
+      } else {
+        callback(new Error("File not found"));
+      }
     }
   };
 
