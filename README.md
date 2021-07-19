@@ -58,7 +58,7 @@
 4. 在router/user.js文件内的` /info `路由下调用findUser()方法并传入解析后的用户名进行查询` decode.username `
 
 ## 10.电子书上传
-1. 在utils/constant.js文件内配置上传地址。` const UPLOAD_PATH = 'D:/MyProject/009-BookManagementSystem_Server/upload' `
+1. 在utils/constant.js文件内配置上传地址。` const UPLOAD_PATH = 'D:/MyTest/upload' `
 2. 在router/book.js文件内定义图书处理路由
 3. 安装multer。` npm i -S multer `
 4. 在router/book.js定义上传图书API。` multer({ dest: ${UPLOAD_PATH} + '/book' }).single('file') `

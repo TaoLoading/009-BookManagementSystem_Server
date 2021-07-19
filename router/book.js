@@ -14,6 +14,7 @@ router.post('/upload',
       new Result('上传失败').fail(res)
     } else {
       const book = new Book(req.file)
+      console.log(book)
       new Result('上传成功').success(res)
     }
   }
