@@ -2,6 +2,7 @@
 
 const { MINE_TYPE_EPUB, UPLOAD_URL, UPLOAD_PATH } = require('../utils/constant')
 const fs = require('fs')
+const Epub = require('../utils/epub')
 
 class Book {
   constructor(file, data) {
@@ -60,8 +61,10 @@ class Book {
     this.publisher = ''
     // 目录
     this.contents = []
-    // 封面图片URL
-    this.cover = ''
+    // 封面图片的URL
+    this.coverUrl = ''
+    // 封面图片的路径
+    this.coverPath = ''
     // 分类ID
     this.category = -1
     // 分类名称
@@ -72,6 +75,61 @@ class Book {
 
   createBookFromData(data) {
     console.log('createBookFromData', data)
+  }
+
+  // 使用epub库解析电子书
+  parse() {
+    return new Promise((resolve, reject) => {
+      const bookPath = `${UPLOAD_PATH}${this.filePath}`
+      // 错误处理
+      if (!fs.existsSync(bookPath)) {
+        reject(new Error('电子书不存在'))
+      }
+      // 使用epub库解析电子书，步骤由epub库给出
+      const epub = new Epub(bookPath)
+      epub.on('error', err => {
+        reject(err)
+      })
+      epub.on('end', err => {
+        if (err) {
+          reject(err)
+        } else {
+          // console.log(epub.metadata)
+          const { language, creator, creatorFileAs, title, cover, publisher } = epub.metadata
+          if (!title) {
+            reject(new Error('图书标题为空'))
+          } else {
+            // 更新电子书信息
+            this.title = title
+            this.language = language || 'en'
+            this.author = creator || creatorFileAs || 'unknown'
+            this.publisher = publisher || 'unknown'
+            this.rootFile = epub.rootFile
+            // 获取封面
+            const handleGetImage = (err, file, mineType) => {
+              // err：报错；file：文件的Buffer；mineType：图片格式(形式为image/jpeg)
+              if (err) {
+                reject(err)
+              } else {
+                // 图片后缀，即那种格式的图片
+                const suffix = mineType.split('/')[1]
+                // 图片存放路径
+                const coverPath = `${UPLOAD_PATH}/img/${this.fileName}.${suffix}`
+                // 图片存放url
+                const coverUrl = `${UPLOAD_URL}/img/${this.fileName}.${suffix}`
+                // 将Buffer写入硬盘
+                fs.writeFileSync(coverPath, file, 'binary')
+                this.coverPath = `/img/${this.fileName}.${suffix}`
+                this.coverUrl = coverUrl
+                resolve(this)
+              }
+            }
+            epub.getImage(cover, handleGetImage)
+          }
+        }
+      })
+      epub.parse()
+    })
   }
 }
 

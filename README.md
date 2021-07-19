@@ -62,3 +62,6 @@
 2. 在router/book.js文件内定义图书处理路由
 3. 安装multer。` npm i -S multer `
 4. 在router/book.js定义上传图书API。` multer({ dest: ${UPLOAD_PATH} + '/book' }).single('file') `
+
+## 11.电子书解析
+1. 借助upub库实现，详见14-5
