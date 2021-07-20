@@ -3,6 +3,8 @@
 const { MINE_TYPE_EPUB, UPLOAD_URL, UPLOAD_PATH } = require('../utils/constant')
 const fs = require('fs')
 const Epub = require('../utils/epub')
+// 用于解析电子书
+const xml2js = require('xml2js').parseString
 
 class Book {
   constructor(file, data) {
@@ -77,7 +79,7 @@ class Book {
     console.log('createBookFromData', data)
   }
 
-  // 使用epub库解析电子书
+  // 解析电子书
   parse() {
     return new Promise((resolve, reject) => {
       const bookPath = `${UPLOAD_PATH}${this.filePath}`
@@ -124,12 +126,138 @@ class Book {
                 resolve(this)
               }
             }
-            epub.getImage(cover, handleGetImage)
+            try {
+              // 解压电子书
+              this.unzip()
+              // 解析目录
+              this.parseContents(epub).then(({ chapters }) => {
+                // 获取章节信息
+                this.contents = chapters
+                // 获取封面
+                epub.getImage(cover, handleGetImage)
+              })
+            } catch (error) {
+              reject(error)
+            }
           }
         }
       })
       epub.parse()
     })
+  }
+
+  // 解压电子书
+  unzip() {
+    const AmdZip = require('adm-zip')
+    const zip = new AmdZip(Book.genPath(this.path))
+    // 规定解压后存放地址
+    zip.extractAllTo(Book.genPath(this.unzipPath, true))
+  }
+
+  // 解析目录
+  parseContents(epub) {
+    // 获取Ncx即目录文件
+    function getNcxFilePath() {
+      const spine = epub && epub.spine
+      const mainfest = epub && epub.mainfest
+      const ncx = spine.toc && spine.toc.href
+      const id = spine.toc && spine.toc.id
+      if (ncx) {
+        return ncx
+      } else {
+        return mainfest[id].href
+      }
+    }
+    // 查找子目录
+    // pid为父级id
+    function findParent(array, level = 0, pid = '') {
+      return array.map(item => {
+        item.level = level
+        item.pid = pid
+        if (item.navPoint && item.navPoint.length > 0) {
+          // 当子节点为数组则证明存在节点嵌套，继续查找
+          item.navPoint = findParent(item.navPoint, level + 1, item['$'].id)
+        } else if (item.navPoint) {
+          item.navPoint.level = level + 1
+          item.navPoint.pid = item['$'].id
+        }
+        return item
+      })
+    }
+    // 将目录数组扁平化
+    function flatten(array) {
+      return [].concat(...array.map(item => {
+        if (item.navPoint && item.navPoint.length > 0) {
+          // 当子节点为数组则证明存在节点嵌套，继续扁平化
+          return [].concat(item, ...flatten(item.navPoint))
+        } else if (item.navPoint) {
+          return [].concat(item, item.navPoint)
+        }
+        return item
+      }))
+    }
+
+    // 目录文件绝对路径
+    const ncxFilePath = Book.genPath(`${this.unzipPath}/${getNcxFilePath()}`)
+    if (fs.existsSync(ncxFilePath)) {
+      return new Promise((resolve, reject) => {
+        const xml = fs.readFileSync(ncxFilePath, 'utf-8')
+        const fileName = this.fileName
+        xml2js(xml, {
+          // 解析配置
+          explicitArray: false,
+          ignoreAttrs: false
+        }, function (err, json) {
+          if (err) {
+            reject(err)
+          } else {
+            const navMap = json.ncx.navMap
+            if (navMap.navPoint && navMap.navPoint.length > 0) {
+              navMap.navPoint = findParent(navMap.navPoint)
+              // 将目录数组扁平化
+              const newNavMap = flatten(navMap.navPoint)
+              // 存放章节的数组
+              const chapters = []
+              // epub.flow为电子书展示顺序
+              epub.flow.forEach((chapter, index) => {
+                if (index + 1 > newNavMap.length) {
+                  return
+                }
+                const nav = newNavMap[index]
+                // 章节路径
+                chapter.text = `${UPLOAD_URL}/unzip/${fileName}/${chapter.href}`
+                // 对章节标题赋值
+                if (nav && nav.navLabel) {
+                  chapter.label = nav.navLabel.text || ''
+                } else {
+                  chapter.label = ''
+                }
+                // 对章节信息进行补充规范
+                chapter.level = nav.level
+                chapter.pid = nav.pid
+                chapter.navId = nav['$'].id
+                chapter.fileName = fileName
+                chapter.order = index + 1
+                chapters.push(chapter)
+              })
+              resolve({ chapters })
+            } else {
+              reject('目录解析失败，目录数为0')
+            }
+          }
+        })
+      })
+    } else {
+      throw new Error('目录对应的资源文件不存在')
+    }
+  }
+
+  // 将相对路径转化为绝对路径
+  static genPath(path) {
+    if (!path.startsWith('/')) {
+      path = `/${path}`
+    }
+    return `${UPLOAD_PATH}${path}`
   }
 }
 
