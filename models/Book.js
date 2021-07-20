@@ -5,6 +5,7 @@ const fs = require('fs')
 const Epub = require('../utils/epub')
 // 用于解析电子书
 const xml2js = require('xml2js').parseString
+const path = require('path')
 
 class Book {
   constructor(file, data) {
@@ -201,9 +202,13 @@ class Book {
 
     // 目录文件绝对路径
     const ncxFilePath = Book.genPath(`${this.unzipPath}/${getNcxFilePath()}`)
+    console.log('ncxFilePath是', ncxFilePath)
     if (fs.existsSync(ncxFilePath)) {
       return new Promise((resolve, reject) => {
         const xml = fs.readFileSync(ncxFilePath, 'utf-8')
+        // 获得目录文件所在文件夹的绝对路径
+        const dir = path.dirname(ncxFilePath).replace(UPLOAD_PATH, '')
+        console.log('dir是', dir)
         const fileName = this.fileName
         xml2js(xml, {
           // 解析配置
@@ -220,24 +225,14 @@ class Book {
               const newNavMap = flatten(navMap.navPoint)
               // 存放章节的数组
               const chapters = []
-              // epub.flow为电子书展示顺序
-              epub.flow.forEach((chapter, index) => {
-                if (index + 1 > newNavMap.length) {
-                  return
-                }
-                const nav = newNavMap[index]
-                // 章节路径
-                chapter.text = `${UPLOAD_URL}/unzip/${fileName}/${chapter.href}`
-                // 对章节标题赋值
-                if (nav && nav.navLabel) {
-                  chapter.label = nav.navLabel.text || ''
-                } else {
-                  chapter.label = ''
-                }
-                // 对章节信息进行补充规范
-                chapter.level = nav.level
-                chapter.pid = nav.pid
-                chapter.navId = nav['$'].id
+              // 对章节信息进行补充规范
+              newNavMap.forEach((chapter, index) => {
+                // 章节相对路径
+                const src = chapter.content['$'].src
+                // 章节绝对路径
+                chapter.text = `${UPLOAD_URL}${dir}/${src}`
+                chapter.label = chapter.navLabel.text || ''
+                chapter.navId = chapter['$'].id
                 chapter.fileName = fileName
                 chapter.order = index + 1
                 chapters.push(chapter)
