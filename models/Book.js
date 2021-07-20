@@ -130,9 +130,11 @@ class Book {
               // 解压电子书
               this.unzip()
               // 解析目录
-              this.parseContents(epub).then(({ chapters }) => {
+              this.parseContents(epub).then(({ chapters, chapterTree }) => {
                 // 获取章节信息
                 this.contents = chapters
+                // 获取目录树
+                this.contentsTree = chapterTree
                 // 获取封面
                 epub.getImage(cover, handleGetImage)
               })
@@ -240,7 +242,20 @@ class Book {
                 chapter.order = index + 1
                 chapters.push(chapter)
               })
-              resolve({ chapters })
+              // 目录树
+              const chapterTree = []
+              chapters.forEach(c => {
+                c.children = []
+                if (c.pid == '') {
+                  // pid为空则证明是一级目录，直接push
+                  chapterTree.push(c)
+                } else {
+                  // 多级目录则找到对应的父级进行push
+                  const parent = chapters.find(_ => _.navId == c.pid)
+                  parent.children.push(c)
+                }
+              })
+              resolve({ chapters, chapterTree })
             } else {
               reject('目录解析失败，目录数为0')
             }
