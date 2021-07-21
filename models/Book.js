@@ -77,7 +77,26 @@ class Book {
   }
 
   createBookFromData(data) {
-    console.log('createBookFromData', data)
+    this.fileName = data.fileName
+    this.cover = data.coverPath
+    this.title = data.title
+    this.author = data.author
+    this.publisher = data.publisher
+    this.bookId = data.fileName
+    this.language = data.language
+    this.rootFile = data.rootFile
+    this.originalName = data.originalName
+    this.path = data.path || data.filePath
+    this.filePath = data.path || data.filePath
+    this.unzipPath = data.unzipPath
+    this.coverPath = data.coverPath
+    this.createUser = data.username
+    this.createDt = new Date().getTime()
+    this.updateDt = new Date().getTime()
+    this.updateType = data.updateType === 0 ? data.updateType : 1
+    this.contents = data.contents
+    this.category = data.category || 99
+    this.categoryText = data.categoryText || '自定义'
   }
 
   // 解析电子书
@@ -202,13 +221,11 @@ class Book {
 
     // 目录文件绝对路径
     const ncxFilePath = Book.genPath(`${this.unzipPath}/${getNcxFilePath()}`)
-    console.log('ncxFilePath是', ncxFilePath)
     if (fs.existsSync(ncxFilePath)) {
       return new Promise((resolve, reject) => {
         const xml = fs.readFileSync(ncxFilePath, 'utf-8')
         // 获得目录文件所在文件夹的绝对路径
         const dir = path.dirname(ncxFilePath).replace(UPLOAD_PATH, '')
-        console.log('dir是', dir)
         const fileName = this.fileName
         xml2js(xml, {
           // 解析配置
@@ -268,6 +285,30 @@ class Book {
       path = `/${path}`
     }
     return `${UPLOAD_PATH}${path}`
+  }
+
+  // 筛选对象所带属性，使其符合数据库的要求
+  toDB() {
+    return {
+      fileName: this.fileName,
+      cover: this.coverPath,
+      title: this.title,
+      author: this.author,
+      publisher: this.publisher,
+      bookId: this.fileName,
+      language: this.language,
+      rootFile: this.rootFile,
+      originalName: this.originalName,
+      filePath: this.filePath,
+      unzipPath: this.unzipPath,
+      coverPath: this.coverPath,
+      createUser: this.createUser,
+      createDt: this.createDt,
+      updateDt: this.updateDt,
+      updateType: this.updateType,
+      category: this.category,
+      categoryText: this.categoryText
+    }
   }
 }
 

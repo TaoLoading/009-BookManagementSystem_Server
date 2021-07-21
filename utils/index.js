@@ -9,6 +9,11 @@ function md5(s) {
     .update(String(s)).digest('hex')
 }
 
+// 判断传入是否为对象
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]'
+}
+
 // 解析JWT Token
 function decoded(req) {
   // 在请求头中拿到token
@@ -21,4 +26,8 @@ function decoded(req) {
   return jwt.verify(token, PRIVATE_KEY)
 }
 
-module.exports = { md5, decoded }
+module.exports = {
+  md5,
+  decoded,
+  isObject
+}
