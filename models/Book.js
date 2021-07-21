@@ -94,7 +94,7 @@ class Book {
     this.createDt = new Date().getTime()
     this.updateDt = new Date().getTime()
     this.updateType = data.updateType === 0 ? data.updateType : 1
-    this.contents = data.contents
+    this.contents = data.contents || []
     this.category = data.category || 99
     this.categoryText = data.categoryText || '自定义'
   }
@@ -227,6 +227,7 @@ class Book {
         // 获得目录文件所在文件夹的绝对路径
         const dir = path.dirname(ncxFilePath).replace(UPLOAD_PATH, '')
         const fileName = this.fileName
+        const unzipPath = this.unzipPath
         xml2js(xml, {
           // 解析配置
           explicitArray: false,
@@ -247,6 +248,8 @@ class Book {
                 // 章节相对路径
                 const src = chapter.content['$'].src
                 // 章节绝对路径
+                chapter.id = `${src}`
+                chapter.href = `${dir}/${src}`.replace(unzipPath, '')
                 chapter.text = `${UPLOAD_URL}${dir}/${src}`
                 chapter.label = chapter.navLabel.text || ''
                 chapter.navId = chapter['$'].id
@@ -309,6 +312,10 @@ class Book {
       category: this.category,
       categoryText: this.categoryText
     }
+  }
+
+  getContents() {
+    return this.contents
   }
 }
 
