@@ -119,7 +119,7 @@ class Book {
           // console.log(epub.metadata)
           const { language, creator, creatorFileAs, title, cover, publisher } = epub.metadata
           if (!title) {
-            reject(new Error('图书标题为空'))
+            reject(new Error('电子书标题为空'))
           } else {
             // 更新电子书信息
             this.title = title

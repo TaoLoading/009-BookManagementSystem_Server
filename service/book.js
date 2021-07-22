@@ -4,7 +4,6 @@ const _ = require('lodash')
 
 // 检查电子书是否存在
 function exist(book) {
-  console.log('book是', book)
   const { title, author, publisher } = book
   // 当标题、作者、出版社都相同时了，则证明该电子书已存在
   const sql = `select * from book where title= '${title}' and author= '${author}' and publisher = '${publisher}'`
@@ -68,7 +67,7 @@ function insertBook(book) {
           resolve()
         }
       } else {
-        reject(new Error('新增的图书信息不合法'))
+        reject(new Error('新增的电子书信息不合法'))
       }
     } catch (error) {
       reject(error)
@@ -76,6 +75,21 @@ function insertBook(book) {
   })
 }
 
+// 查询电子书信息
+function getBook(fileName) {
+  console.log('fileName是', fileName)
+  return new Promise( async (resolve,reject)=>{
+    // 从数据库中查询电子书信息和目录
+    const bookSql = `select * from book where fileName='${fileName.fileName}'`
+    const contentsSql = `select * from contents where fileName = '${fileName.fileName}' order by \`order\``
+    const book = await db.queryOne(bookSql)
+    const contents = await db.queryOne(contentsSql)
+    // resolve({book, contents})
+    resolve({book})
+  })
+}
+
 module.exports = {
-  insertBook
+  insertBook,
+  getBook
 }

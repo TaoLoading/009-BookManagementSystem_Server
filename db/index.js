@@ -41,7 +41,7 @@ function querySql(sql) {
   })
 }
 
-// 查询单个用户
+// 查询单个目标
 function queryOne(sql) {
   return new Promise((resolve, reject) => {
     querySql(sql).then(result => {
@@ -56,11 +56,11 @@ function queryOne(sql) {
   })
 }
 
-// 新增图书
+// 新增电子书
 function insert(model, tableName) {
   return new Promise((resolve, reject) => {
     if (!isObject(model)) {
-      reject(new Error('新增图书失败，图书信息格式不正确'))
+      reject(new Error('新增电子书失败，电子书信息格式不正确'))
     } else {
       const keys = []
       const values = []

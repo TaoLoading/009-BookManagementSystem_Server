@@ -9,7 +9,7 @@ const bookService = require('../service/book')
 
 const router = express.Router()
 
-// 上传图书路由
+// 上传电子书路由
 router.post('/upload',
   // 使用multer进行上传设置。dest为上传地址，single为上传单个文件
   multer({ dest: `${UPLOAD_PATH}/book` }).single('file'),
@@ -29,7 +29,7 @@ router.post('/upload',
   }
 )
 
-// 新增图书路由
+// 新增电子书路由
 router.post('/create',
   function (req, res, next) {
     const decode = decoded(req)
@@ -44,6 +44,24 @@ router.post('/create',
       .catch(error => {
         next(boom.badImplementation(error))
       })
+  }
+)
+
+// 获取电子书信息
+router.get('/get',
+  function (req, res, next) {
+    const fileName = req.query
+    if (!fileName) {
+      next(boom.badRequest(new Error('参数fileName不能为空')))
+    } else {
+      bookService.getBook(fileName)
+      .then(book=>{
+        new Result(book,'获取图书成功').success(res)
+      })
+      .catch(err=>{
+        next(boom.badImplementation(err))
+      })
+    }
   })
 
 module.exports = router

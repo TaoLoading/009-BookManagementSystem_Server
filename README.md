@@ -59,9 +59,9 @@
 
 ## 10.电子书上传
 1. 在utils/constant.js文件内配置上传地址。` const UPLOAD_PATH = 'D:/MyTest/upload' `
-2. 在router/book.js文件内定义图书处理路由
+2. 在router/book.js文件内定义电子书处理路由
 3. 安装multer。` npm i -S multer `
-4. 在router/book.js定义上传图书API。` multer({ dest: ${UPLOAD_PATH} + '/book' }).single('file') `
+4. 在router/book.js定义上传电子书API。` multer({ dest: ${UPLOAD_PATH} + '/book' }).single('file') `
 
 ## 11.电子书解析
 1. 借助upub库实现，详见14-5
