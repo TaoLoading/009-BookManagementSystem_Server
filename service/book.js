@@ -41,6 +41,7 @@ async function insertContents(book) {
         'level',
         'label',
         'pid',
+        'text',
         'navId'
       ])
       // console.log('_content', _content)
@@ -77,15 +78,23 @@ function insertBook(book) {
 
 // 查询电子书信息
 function getBook(fileName) {
-  console.log('fileName是', fileName)
   return new Promise( async (resolve,reject)=>{
     // 从数据库中查询电子书信息和目录
     const bookSql = `select * from book where fileName='${fileName.fileName}'`
     const contentsSql = `select * from contents where fileName = '${fileName.fileName}' order by \`order\``
     const book = await db.queryOne(bookSql)
-    const contents = await db.queryOne(contentsSql)
-    // resolve({book, contents})
+    const contents = await db.querySql(contentsSql)
+    // book.contents = contents
+    console.log('book是',book)
+    console.log('contents是',contents)
+    if(book){
+      book.contentsTree = Book.genContentsTree(contents)
+      // console.log('树是',book.contentsTree);
     resolve({book})
+    } else {
+      reject(new Error('电子书不存在'))
+    }
+    // resolve({book, contents})
   })
 }
 

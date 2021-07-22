@@ -316,6 +316,24 @@ class Book {
     return `${UPLOAD_PATH}${path}`
   }
 
+  // 将目录数组转化为目录树
+  static genContentsTree(contents){
+    console.log('contents',contents);
+    const contentsTree = []
+    contents.forEach(c => {
+      c.children = []
+      if (c.pid == '') {
+        // pid为空则证明是一级目录，直接push
+        contentsTree.push(c)
+      } else {
+        // 多级目录则找到对应的父级进行push
+        const parent = contents.find(_ => _.navId == c.pid)
+        parent.children.push(c)
+      }
+    })
+    return contentsTree
+  }
+
   // 筛选对象所带属性，使其符合数据库的要求
   toDB() {
     return {
