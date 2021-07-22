@@ -1,6 +1,6 @@
 const mysql = require('mysql')
 const config = require('./config')
-const { debug } = require('../utils/constant')
+// const { debug } = require('../utils/constant')
 const { isObject } = require('../utils')
 
 // 建立数据库连接
@@ -18,17 +18,17 @@ function connect() {
 // 查询sql语句
 function querySql(sql) {
   const conn = connect()
-  debug && console.log(`查询语句为：${sql}`)
+  // debug && console.log(`查询语句为：${sql}`)
   return new Promise((resolve, reject) => {
     try {
       conn.query(sql, (err, result) => {
         if (err) {
           // 错误提示
-          debug && console.log('查询失败，原因:' + JSON.stringify(err))
+          // debug && console.log('查询失败，原因:' + JSON.stringify(err))
           reject(err)
         } else {
           // 成功提示
-          debug && console.log('查询成功', JSON.stringify(result))
+          // debug && console.log('查询成功', JSON.stringify(result))
           resolve(result)
         }
       })
@@ -60,7 +60,6 @@ function queryOne(sql) {
 function insert(model, tableName) {
   return new Promise((resolve, reject) => {
     if (!isObject(model)) {
-      console.log('model是', model);
       reject(new Error('新增图书失败，图书信息格式不正确'))
     } else {
       const keys = []
@@ -78,7 +77,7 @@ function insert(model, tableName) {
         const keysString = keys.join(',')
         const valuesString = values.join(',')
         sql = `${sql}${keysString}) values (${valuesString})`
-        debug && console.log(`插入语句为：${sql}`)
+        // debug && console.log(`插入语句为：${sql}`)
         // 将sql执行到数据库中
         const conn = connect()
         try {

@@ -34,10 +34,10 @@ class Book {
     // 电子书解压后的url地址
     const unzipUrl = `${UPLOAD_URL}/unzip/${filename}${suffix}`
     // fs.existsSync(path)：存在路径返回true，不存在返回false
-    if (!fs.existsSync(unzipPath)) {
+    /* if (!fs.existsSync(unzipPath)) {
       // 创建解压文件夹
       fs.mkdirSync(unzipPath, { recursive: true })
-    }
+    } */
     if (fs.existsSync(oldBookPath) && !fs.existsSync(bookPath)) {
       // 对文件重命名，添加后缀名
       fs.renameSync(oldBookPath, bookPath)
@@ -279,6 +279,32 @@ class Book {
       })
     } else {
       throw new Error('目录对应的资源文件不存在')
+    }
+  }
+
+  // 移出文件夹中已上传的文件、封面及解压文件夹
+  reset() {
+    if (Book.pathExists(this.filePath)) {
+      // 删除文件
+      fs.unlinkSync(Book.genPath(this.filePath))
+    }
+    // 删除图片存在问题，初步分析是因为存入时存的是url而不是path(debug)
+    /* if (Book.pathExists(this.coverPath)) {
+      // 删除封面
+      fs.unlinkSync(Book.genPath(this.coverPath))
+    } */
+    if (Book.pathExists(this.unzipPath)) {
+      // 删除解压文件夹
+      fs.rmdirSync(Book.genPath(this.unzipPath), { recursive: true })
+    }
+  }
+
+  // 查看文件路径是否存在
+  static pathExists(path) {
+    if (path.startsWith(UPLOAD_PATH)) {
+      return fs.existsSync(path)
+    } else {
+      return fs.existsSync(Book.genPath(path))
     }
   }
 

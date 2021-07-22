@@ -20,7 +20,6 @@ router.post('/upload',
       const book = new Book(req.file)
       book.parse()
         .then(book => {
-          // console.log('book', book)
           new Result(book, '上传成功').success(res)
         })
         .catch(err => {

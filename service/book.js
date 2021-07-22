@@ -3,10 +3,29 @@ const db = require('../db')
 const _ = require('lodash')
 
 // 检查电子书是否存在
-function exist() { }
+function exist(book) {
+  console.log('book是', book)
+  const { title, author, publisher } = book
+  // 当标题、作者、出版社都相同时了，则证明该电子书已存在
+  const sql = `select * from book where title= '${title}' and author= '${author}' and publisher = '${publisher}'`
+  return db.queryOne(sql)
+}
 
 // 移出电子书
-function removeBook() { }
+async function removeBook(book) {
+  if (book) {
+    // 在上传到的文件夹中对此电子书进行删除
+    book.reset()
+    /* if (book.fileName) {
+      console.log(book.fileName)
+      // 从数据库中对此电子书进行删除
+      const removeBookSql = `delete from book where fileName=${book.fileName}`
+      const removeContentsSql = `delete from contents where fileName=${book.fileName}`
+      await db.querySql(removeBookSql)
+      await db.querySql(removeContentsSql)
+    } */
+  }
+}
 
 // 向数据库中插入目录
 async function insertContents(book) {
