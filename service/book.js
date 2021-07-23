@@ -76,6 +76,27 @@ function insertBook(book) {
   })
 }
 
+// 更新电子书
+function updateBook(book){
+  return new Promise(async(resolve,reject)=>{
+    try {
+      if(book instanceof Book){
+        // 先查询电子书信息，防止传入的部分信息在数据库中缺失
+        const result = await getBook(book)
+        if(result){
+          const model = book.toDB()
+          await db.update(model,'book',`where fileName='${book.fileName}'`)
+          resolve()
+        }
+      } else{
+        reject(new Error('新增的电子书信息不合法'))
+      }
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
 // 查询电子书信息
 function getBook(fileName) {
   return new Promise( async (resolve,reject)=>{
@@ -85,8 +106,6 @@ function getBook(fileName) {
     const book = await db.queryOne(bookSql)
     const contents = await db.querySql(contentsSql)
     // book.contents = contents
-    console.log('book是',book)
-    console.log('contents是',contents)
     if(book){
       book.contentsTree = Book.genContentsTree(contents)
       // console.log('树是',book.contentsTree);
@@ -100,5 +119,6 @@ function getBook(fileName) {
 
 module.exports = {
   insertBook,
+  updateBook,
   getBook
 }

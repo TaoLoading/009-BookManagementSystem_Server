@@ -318,7 +318,6 @@ class Book {
 
   // 将目录数组转化为目录树
   static genContentsTree(contents){
-    console.log('contents',contents);
     const contentsTree = []
     contents.forEach(c => {
       c.children = []

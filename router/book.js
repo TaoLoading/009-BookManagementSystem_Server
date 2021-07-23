@@ -47,6 +47,24 @@ router.post('/create',
   }
 )
 
+// 更新电子书路由
+router.post('/update',
+  function (req, res, next) {
+    const decode = decoded(req)
+    if (decode && decode.username) {
+      req.body.username = decode.username
+    }
+    const book = new Book(null, req.body)
+    bookService.updateBook(book)
+      .then(() => {
+        new Result('更新电子书成功').success(res)
+      })
+      .catch(error => {
+        next(boom.badImplementation(error))
+      })
+  }
+)
+
 // 获取电子书信息
 router.get('/get',
   function (req, res, next) {
@@ -62,6 +80,7 @@ router.get('/get',
         next(boom.badImplementation(err))
       })
     }
-  })
+  }
+)
 
 module.exports = router
