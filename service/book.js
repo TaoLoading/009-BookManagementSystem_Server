@@ -117,8 +117,24 @@ function getBook(fileName) {
   })
 }
 
+// 获取下拉菜单中的分类信息
+async function getCategory() {
+  const sql = 'select * from category order by category asc'
+  const result = await db.querySql(sql)
+  const categoryList = []
+  result.forEach(item => {
+    categoryList.push({
+      label: item.categoryText,
+      value: item.category,
+      num: item.num
+    })
+  })
+  return categoryList
+}
+
 module.exports = {
   insertBook,
   updateBook,
-  getBook
+  getBook,
+  getCategory
 }
