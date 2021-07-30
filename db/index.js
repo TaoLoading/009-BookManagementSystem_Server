@@ -113,11 +113,11 @@ function update(model, tableName, where) {
           entry.push(`\`${key}\`='${model[key]}'`)
         }
       })
-      console.log(entry);
+      // console.log(entry);
       if (entry.length > 0) {
         let sql = `UPDATE \`${tableName}\` SET`
         sql = `${sql} ${entry.join(',')} ${where}`
-        console.log(sql);
+        // console.log(sql);
         const conn = connect()
         try {
           conn.query(sql, (err, result) => {

@@ -77,18 +77,18 @@ function insertBook(book) {
 }
 
 // 更新电子书
-function updateBook(book){
-  return new Promise(async(resolve,reject)=>{
+function updateBook(book) {
+  return new Promise(async (resolve, reject) => {
     try {
-      if(book instanceof Book){
+      if (book instanceof Book) {
         // 先查询电子书信息，防止传入的部分信息在数据库中缺失
         const result = await getBook(book)
-        if(result){
+        if (result) {
           const model = book.toDB()
-          await db.update(model,'book',`where fileName='${book.fileName}'`)
+          await db.update(model, 'book', `where fileName='${book.fileName}'`)
           resolve()
         }
-      } else{
+      } else {
         reject(new Error('新增的电子书信息不合法'))
       }
     } catch (error) {
@@ -99,17 +99,17 @@ function updateBook(book){
 
 // 查询电子书信息
 function getBook(fileName) {
-  return new Promise( async (resolve,reject)=>{
+  return new Promise(async (resolve, reject) => {
     // 从数据库中查询电子书信息和目录
     const bookSql = `select * from book where fileName='${fileName.fileName}'`
     const contentsSql = `select * from contents where fileName = '${fileName.fileName}' order by \`order\``
     const book = await db.queryOne(bookSql)
     const contents = await db.querySql(contentsSql)
     // book.contents = contents
-    if(book){
+    if (book) {
       book.contentsTree = Book.genContentsTree(contents)
       // console.log('树是',book.contentsTree);
-    resolve({book})
+      resolve({ book })
     } else {
       reject(new Error('电子书不存在'))
     }
@@ -130,6 +130,43 @@ async function getCategory() {
     })
   })
   return categoryList
+}
+
+// 获取表格中的数据
+async function listBook(p) {
+  const {
+    page = 1,
+    pageSize = 20,
+    sort,
+    title,
+    category,
+    author
+  } = p
+  const offset = (page - 1) * pageSize
+  let bookSql = 'select * from book'
+  let where = 'where'
+  title && (where = db.andLike(where, 'title', title))
+  author && (where = db.andLike(where, 'author', author))
+  category && (where = db.and(where, 'categoryText', category))
+  if (where !== 'where') {
+    bookSql = `${bookSql} ${where}`
+  }
+  if (sort) {
+    const symbol = sort[0]
+    const column = sort.slice(1, sort.length)
+    const order = symbol === '+' ? 'asc' : 'desc'
+    bookSql = `${bookSql} order by ${column} ${order}`
+  }
+  bookSql = `${bookSql} limit ${pageSize} offset ${offset}`
+  let countSql = `select count(*) as count from book`
+  if (where !== 'where') {
+    countSql = `${countSql} ${where}`
+  }
+  const list = await db.querySql(bookSql)
+  console.log(bookSql, '\n', countSql)
+  list.forEach(book => book.cover = Book.genCoverUrl(book))
+  const count = await db.querySql(countSql)
+  return { list, count: count[0].count, page, pageSize }
 }
 
 module.exports = {
