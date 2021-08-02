@@ -317,7 +317,7 @@ class Book {
   }
 
   // 将目录数组转化为目录树
-  static genContentsTree(contents){
+  static genContentsTree(contents) {
     const contentsTree = []
     contents.forEach(c => {
       c.children = []
@@ -331,6 +331,32 @@ class Book {
       }
     })
     return contentsTree
+  }
+
+  // 解析封面图片路径(debug)
+  static genCoverUrl(book) {
+    if (Number(book.updateType) === 0) {
+      const { cover } = book
+      if (cover) {
+        if (cover.startsWith('/')) {
+          return `${OLD_UPLOAD_URL}${cover}`
+        } else {
+          return `${OLD_UPLOAD_URL}/${cover}`
+        }
+      } else {
+        return null
+      }
+    } else {
+      if (book.cover) {
+        if (book.cover.startsWith('/')) {
+          return `${UPLOAD_URL}${book.cover}`
+        } else {
+          return `${UPLOAD_URL}/${book.cover}`
+        }
+      } else {
+        return null
+      }
+    }
   }
 
   // 筛选对象所带属性，使其符合数据库的要求
