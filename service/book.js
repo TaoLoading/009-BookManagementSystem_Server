@@ -142,21 +142,29 @@ async function listBook(p) {
     category,
     author
   } = p
+  // 偏移量。即从第几个开始查
   const offset = (page - 1) * pageSize
   let bookSql = 'select * from book'
+  // 查询条件并不一定都有，故对where进行设置
   let where = 'where'
+  // title存在限制条件时
   title && (where = db.andLike(where, 'title', title))
+  // author存在限制条件时
   author && (where = db.andLike(where, 'author', author))
+  // category存在限制条件时
   category && (where = db.and(where, 'categoryText', category))
   if (where !== 'where') {
     bookSql = `${bookSql} ${where}`
   }
+  // 确定排序规则
   if (sort) {
+    // 获取符号。字符串也可以用类似数组的方式取值
     const symbol = sort[0]
     const column = sort.slice(1, sort.length)
     const order = symbol === '+' ? 'asc' : 'desc'
     bookSql = `${bookSql} order by ${column} ${order}`
   }
+  // 查询语句。limit限制数量，offset规定偏移量
   bookSql = `${bookSql} limit ${pageSize} offset ${offset}`
   let countSql = `select count(*) as count from book`
   if (where !== 'where') {
