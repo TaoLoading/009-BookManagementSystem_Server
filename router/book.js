@@ -97,7 +97,7 @@ router.get('/list', function (req, res, next) {
   bookService.listBook(req.query)
     .then(({ list, count, page, pageSize }) => {
       new Result(
-        list,
+        { list, count, page: +page, pageSize: +pageSize },
         '获取图书列表成功',
         {
           page: Number(page),
@@ -112,5 +112,21 @@ router.get('/list', function (req, res, next) {
     })
 })
 
+// 删除电子书
+router.get('/delete', function (req, res, next) {
+  const { fileName } = req.query
+  if (!fileName) {
+    next(boom.badRequest(new Error('参数fileName不能为空')))
+  } else {
+    bookService.deleteBook(fileName)
+      .then(() => {
+        new Result(null, '删除成功').success(res)
+      })
+      .catch(err => {
+        console.log('/book/delete', err)
+        next(boom.badImplementation(err))
+      })
+  }
+})
 
 module.exports = router

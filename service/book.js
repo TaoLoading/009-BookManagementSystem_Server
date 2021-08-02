@@ -107,6 +107,7 @@ function getBook(fileName) {
     const contents = await db.querySql(contentsSql)
     // book.contents = contents
     if (book) {
+      book.cover = Book.genCoverUrl(book)
       book.contentsTree = Book.genContentsTree(contents)
       // console.log('树是',book.contentsTree);
       resolve({ book })
@@ -166,20 +167,48 @@ async function listBook(p) {
   }
   // 查询语句。limit限制数量，offset规定偏移量
   bookSql = `${bookSql} limit ${pageSize} offset ${offset}`
+  // 统计查询结果数量
   let countSql = `select count(*) as count from book`
   if (where !== 'where') {
     countSql = `${countSql} ${where}`
   }
   const list = await db.querySql(bookSql)
-  console.log(bookSql, '\n', countSql)
+  // 获取封面路径
   list.forEach(book => book.cover = Book.genCoverUrl(book))
   const count = await db.querySql(countSql)
   return { list, count: count[0].count, page, pageSize }
+}
+
+// 删除电子书
+function deleteBook(fileName) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let book = await getBook(fileName)
+      if (book) {
+        if (Number(book.updateType) === 0) {
+          reject(new Error('内置电子书不能删除'))
+        } else {
+          const bookObj = new Book(null, book)
+          const sql = `DELETE FROM book WHERE fileName='${fileName}'`
+          db.querySql(sql).then(() => {
+            bookObj.reset()
+            resolve()
+          })
+        }
+      } else {
+        reject(new Error('电子书不存在'))
+      }
+    } catch (e) {
+      reject(e)
+    }
+  })
 }
 
 module.exports = {
   insertBook,
   updateBook,
   getBook,
-  getCategory
+  getCategory,
+  listBook,
+  deleteBook
 }
